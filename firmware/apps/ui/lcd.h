@@ -35,14 +35,7 @@
 #include <inttypes.h>
 #include <config.h>
 
-/**
- * Use VTxxx emulator extensions
- * Must be defined in config.h
- * I.e. #define LCD_USE_VT 1
- */
-#ifndef LCD_USE_VT
-#define LCD_USE_VT 0
-#endif
+#include "lcdhwcfg.h"
 
 #ifndef EOLN
 #define EOLN "\r\n"
@@ -53,7 +46,6 @@ typedef unsigned char lcdbrightness_t;
 typedef enum {lctOFF=0, lctBLOCK, lctBLINK, lctUNDERLINE, lctHALF} lcdcursor_t;
 typedef enum {ldtOFF=0, ldtON=!ldtOFF} lcddisplay_t;
 
-#include "lcdhw.h"
 
 #ifdef LCD_COLOR
 typedef unsigned char lcdcolor_t;
@@ -69,10 +61,6 @@ typedef struct {
 #if (LCD_COLOR == 1)
     lcdcolor_t fg;          /* Foreground symbol color */
     lcdcolor_t bg;          /* Background symbol color */
-#if (LCD_USE_VT == 1)
-    lcdcolor_t saved_fg;
-    lcdcolor_t saved_bg;
-#endif /* LCD_USE_VT */
 #endif /* LCD_COLOR */
     lcdbrightness_t light;  /* Backlight brighthess */
     int inverse:1;          /* Font style: invese */
@@ -80,11 +68,6 @@ typedef struct {
     int wrap:1;             /* Enable line wrap */
     int scroll:1;           /* Enable scroll display */
     int needrepos:1;        /* Internal flag. Do not change */
-#if (LCD_USE_VT == 1)
-    lcdpos_t saved_row;
-    lcdpos_t saved_col;
-    signed char fmstate;    /* Can use by finite-state machine. I.e. for VT100 terminal emulation */
-#endif /* LCD_USE_VT */
     char dbuf[LCD_ROWS][LCD_COLS];      /* Double buffer */
 } lcdenv_t;
 
@@ -148,14 +131,14 @@ void lcdScreenRefresh(lcdpos_t row1, lcdpos_t row2);
  * @param env - work environment
  */
 lcdpos_t lcdGetRow(lcdenv_t* env);
-#define lcdwGetRow() lcdGetRow(workenv);
+#define lcdwGetRow() lcdGetRow(workenv)
 
 /**
  * Get current column
  * @param env - work environment
  */
 lcdpos_t lcdGetCol(lcdenv_t* env);
-#define lcdwGetCol() lcdGetCol(workenv);
+#define lcdwGetCol() lcdGetCol(workenv)
 
 /**
  * Move cursor
@@ -250,6 +233,9 @@ void lcdClrLine(lcdenv_t* env, lcdpos_t row);
 
 void lcdClrCols(lcdenv_t* env, lcdpos_t row, lcdpos_t colfrom, lcdpos_t colto);
 #define lcdwClrCols(row, colfrom, colto) lcdClrCols(workenv, row, colfrom, colto)
+
+void lcdBackspace(lcdenv_t* env);
+#define lcdwBackspace() lcdBackspace(workenv)
 
 #define lcdClrEndl(env) lcdClrCols((env), lcdGetRow(env), lcdGetCol(env), lcdGetCols()-1)
 #define lcdwClrEndl() lcdClrCols(workenv, lcdGetRow(workenv), lcdGetCol(workenv), lcdGetCols()-1)

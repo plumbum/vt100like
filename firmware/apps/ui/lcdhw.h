@@ -39,18 +39,7 @@
 #include "board.h"
 #include "lcd_encode.h"
 #include "utils.h"
-
-#ifndef LCD_COLOR
-#define LCD_COLOR 0
-#endif
-
-#ifndef LCD_ROWS
-#define LCD_ROWS 4
-#endif
-
-#ifndef LCD_COLS
-#define LCD_COLS 20
-#endif
+#include "lcdhwcfg.h"
 
 
 /*

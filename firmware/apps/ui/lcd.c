@@ -32,6 +32,7 @@
 //******************************************************************************
 
 #include "lcd.h"
+#include "lcdhw.h"
 
 #include <string.h>
 
@@ -191,21 +192,12 @@ void lcdInitEnv(lcdenv_t* env)
     env->wrap = 0;
     env->scroll = 0;
     env->needrepos = 0;
-#if (LCD_USE_VT == 1)
-    env->saved_row = 0;
-    env->saved_col = 0;
-    env->fmstate = 0;
-#endif
     env->frame_row1 = 0;
     env->frame_row2 = lcdGetRows()-1;
 #if (LCD_COLOR == 1)
     // TODO !!!
     env->fg = 0;
     env->bg = 0;
-#if (LCD_USE_VT == 1)
-    env->saved_fg = 0;
-    env->saved_bg = 0;
-#endif /* LCD_USE_VT */
 #endif /* LCD_COLOR */
     lcdClr(env);
     lcdSetCursor(env, lctOFF);
@@ -254,10 +246,32 @@ lcdpos_t lcdGetCol(lcdenv_t* workenv)
 void lcdTab(lcdenv_t* workenv)
 {
     // TODO work only if tabsize is power of 2
-    int end = (workenv->col & ~(workenv->tabsize-1)) + workenv->tabsize;
-    int i;
+    lcdpos_t end = (workenv->col & ~(workenv->tabsize-1)) + workenv->tabsize;
+    lcdpos_t i;
     for(i = workenv->col; i < end; i++)
         lcdPutc(workenv, SPACE);
+}
+
+void lcdBackspace(lcdenv_t* workenv)
+{
+    if(workenv->col>0)
+        workenv->col--;
+    else
+    {
+        if(workenv->row>0)
+        {
+            workenv->col = lcdGetCols()-1;
+            workenv->row--;
+        }
+    }
+    workenv->dbuf[workenv->row][workenv->col] = SPACE;
+    if(workenv == dispenv)
+    {
+        _lcdGoto(workenv->row, workenv->col);
+        lcdData(SPACE);
+        workenv->needrepos = 0;
+        _lcdGoto(workenv->row, workenv->col);
+    }
 }
 
 void lcdLeft(lcdenv_t* workenv, lcdpos_t size)
