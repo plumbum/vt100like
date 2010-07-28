@@ -33,7 +33,8 @@ int main(int argc, char **argv) {
    */
   chThdCreateStatic(waThread1, sizeof(waThread1), NORMALPRIO, Thread1, NULL);
 
-  while (TRUE) {
+  while (TRUE)
+  {
     chThdSleepMilliseconds(500);
   }
   return 0;

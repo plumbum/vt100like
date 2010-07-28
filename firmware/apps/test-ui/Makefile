@@ -7,6 +7,7 @@
 ifeq ($(USE_OPT),)
   USE_OPT = -O2 -ggdb -fomit-frame-pointer -falign-functions=16
   USE_OPT += -Wa,-adhlns=$(<:.c=.lst)
+  USE_OPT += -std=gnu99
 endif
 
 # C++ specific options here (added to USE_OPT).
@@ -74,6 +75,7 @@ CSRC = $(PORTSRC) \
        $(CHIBIOS)/os/various/syscalls.c \
 	   ../ui/lcd.c \
 	   ../ui/lcd_encode.c \
+	   ../ui/vt100.c \
 	   utils.c \
        main.c
 
