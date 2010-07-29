@@ -1,41 +1,61 @@
 #include <ch.h>
 #include <hal.h>
 
-/*
- * Red LEDs blinker thread, times are in milliseconds.
- */
+#include "lcd.h"
+#include "vt100.h"
+#include "utils.h"
+
 static WORKING_AREA(waThread1, 128);
 static msg_t Thread1(void *arg) {
 
-  (void)arg;
-  while (TRUE) {
-    palClearPad(IOPORT3, GPIOC_LED);
-    chThdSleepMilliseconds(500);
-    palSetPad(IOPORT3, GPIOC_LED);
-    chThdSleepMilliseconds(500);
-  }
-  return 0;
+    (void)arg;
+    while (1)
+    {
+        /*
+        GPIOB->BSRR = 1;
+        chThdSleepMilliseconds(500);
+        GPIOB->BRR = 1;
+        */
+        chThdSleepMilliseconds(50);
+    }
+    return 0;
 }
 
-/*
- * Entry point, note, the main() function is already a thread in the system
- * on entry.
- */
+lcdenv_t env;
+lcdenv_t* workenv;
+vtEnv_t vt;
+
 int main(int argc, char **argv) {
 
-  (void)argc;
-  (void)argv;
+    (void)argc;
+    (void)argv;
 
-  sdStart(&SD1, NULL);
+    sdStart(&SD1, NULL);
 
-  /*
-   * Creates the blinker thread.
-   */
-  chThdCreateStatic(waThread1, sizeof(waThread1), NORMALPRIO, Thread1, NULL);
+    /*
+     * Creates the blinker thread.
+     */
+    chThdCreateStatic(waThread1, sizeof(waThread1), NORMALPRIO, Thread1, NULL);
 
-  while (TRUE)
-  {
-    chThdSleepMilliseconds(500);
-  }
-  return 0;
+    workenv = &env;
+    lcdInit(&env);
+    lcdwBackLight(100);
+
+    vtInit(&vt, &env);
+    vtPuts(&vt, "Hello world");
+
+    vtPuts(&vt, "\033cNew age\033[2B\033[5CLine it\b\r\nWow!");
+
+    int cnt = 0;
+    char szBuf[16];
+    while (1)
+    {
+        vtPuts(&vt, "\033[2;4fCnt: ");
+        itoa(chTimeNow(), szBuf);
+        vtPuts(&vt, szBuf);
+        vtPuts(&vt, "\033[K");
+        cnt++;
+        chThdSleepMilliseconds(1);
+    }
+    return 0;
 }

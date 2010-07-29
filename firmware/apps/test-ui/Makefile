@@ -76,6 +76,7 @@ CSRC = $(PORTSRC) \
 	   ../ui/lcd.c \
 	   ../ui/lcd_encode.c \
 	   ../ui/vt100.c \
+	   board.c \
 	   utils.c \
        main.c
 
@@ -109,7 +110,8 @@ ASMSRC = $(PORTASM) \
 
 INCDIR = $(PORTINC) $(KERNINC) $(TESTINC) \
          $(HALINC) $(PLATFORMINC) $(BOARDINC) \
-         $(CHIBIOS)/os/various
+         $(CHIBIOS)/os/various \
+		 ../ui
 
 #
 # Project, sources and paths
